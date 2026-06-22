@@ -1,0 +1,64 @@
+version: '3.9'
+
+services:
+  user-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: userdb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: userpass
+    ports:
+      - "5433:5432"
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+
+  listing-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: listingdb
+      POSTGRES_USER: listing
+      POSTGRES_PASSWORD: listingpass
+    ports:
+      - "5434:5432"
+    volumes:
+      - listing_db_data:/var/lib/postgresql/data
+
+  user-service:
+    build: ./services/user-service
+    environment:
+      SERVER_PORT: 8081
+      DB_HOST: user-db
+      DB_PORT: 5432
+      DB_NAME: userdb
+      DB_USERNAME: user
+      DB_PASSWORD: userpass
+      JWT_SECRET: ${JWT_SECRET:-c2VjdXJlLXRva2VuLXNpZ25pbmcta2V5LXNob3VsZC1iZS1sb25nLWVub3VnaA==}
+    ports:
+      - "8081:8081"
+    depends_on:
+      - user-db
+
+  listing-service:
+    build: ./services/listing-service
+    environment:
+      SERVER_PORT: 8082
+      DB_HOST: listing-db
+      DB_PORT: 5432
+      DB_NAME: listingdb
+      DB_USERNAME: listing
+      DB_PASSWORD: listingpass
+    ports:
+      - "8082:8082"
+    depends_on:
+      - listing-db
+
+  prediction-service:
+    build: ./services/prediction-service
+    environment:
+      SERVER_PORT: 8083
+    ports:
+      - "8083:8083"
+
+volumes:
+  user_db_data:
+  listing_db_data:

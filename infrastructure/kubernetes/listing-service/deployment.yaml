@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: listing-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: listing-service
+  template:
+    metadata:
+      labels:
+        app: listing-service
+    spec:
+      containers:
+        - name: listing-service
+          image: ghcr.io/henrik-13/car-marketplace-listing-service:latest
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: listing-service-config
+            - secretRef:
+                name: listing-service-secret
