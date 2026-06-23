@@ -1,0 +1,54 @@
+package edu.bbte.msoa.listingservice.model;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+@Entity
+@Getter
+@Setter
+@Table(name = "car_listings")
+public class CarListing {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private Long userId;
+
+    @Column(nullable = false)
+    private String make;
+
+    @Column(nullable = false)
+    private String model;
+
+    @Column(nullable = false)
+    private Integer year;
+
+    @Column(nullable = false)
+    private Integer mileage;
+
+    @Column(nullable = false)
+    private String fuelType;
+
+    @Column(nullable = false)
+    private String transmission;
+
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @PrePersist
+    void prePersist() {
+        this.createdAt = Instant.now();
+    }
+}
