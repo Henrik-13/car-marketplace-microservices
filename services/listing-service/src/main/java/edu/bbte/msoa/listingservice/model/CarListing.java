@@ -39,6 +39,24 @@ public class CarListing {
     private String transmission;
 
     @Column(nullable = false)
+    private Integer power;
+
+    @Column(nullable = false)
+    private Integer engineCapacity;
+
+    @Column(nullable = false)
+    private String drivetrain;
+
+    @Column(nullable = false)
+    private String bodyType;
+
+    @Column(nullable = false)
+    private String color;
+
+    @Column(columnDefinition = "TEXT")
+    private String addons;
+
+    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false, precision = 10, scale = 2)

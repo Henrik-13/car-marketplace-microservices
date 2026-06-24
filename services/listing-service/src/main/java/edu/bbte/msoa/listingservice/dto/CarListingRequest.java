@@ -14,6 +14,12 @@ public record CarListingRequest(
         @NotNull @Min(0) Integer mileage,
         @NotBlank String fuelType,
         @NotBlank String transmission,
+        @NotNull @Min(1) Integer power,
+        @NotNull @Min(1) Integer engineCapacity,
+        @NotBlank String drivetrain,
+        @NotBlank String bodyType,
+        @NotBlank String color,
+        String addons,
         @NotBlank String description,
         @NotNull @DecimalMin("0.0") BigDecimal price
 ) {

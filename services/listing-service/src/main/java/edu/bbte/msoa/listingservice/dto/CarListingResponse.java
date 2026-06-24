@@ -12,6 +12,12 @@ public record CarListingResponse(
         Integer mileage,
         String fuelType,
         String transmission,
+        Integer power,
+        Integer engineCapacity,
+        String drivetrain,
+        String bodyType,
+        String color,
+        String addons,
         String description,
         BigDecimal price,
         Instant createdAt
