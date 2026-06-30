@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -65,8 +67,16 @@ public class CarListing {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
+    @OneToMany(mappedBy = "carListing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CarImage> images = new ArrayList<>();
+
     @PrePersist
     void prePersist() {
         this.createdAt = Instant.now();
+    }
+
+    public void addImage(CarImage image) {
+        images.add(image);
+        image.setCarListing(this);
     }
 }

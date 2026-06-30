@@ -203,22 +203,22 @@ print(r2_score(actuals_original, predictions_original))
 print(mean_absolute_error(actuals_original, predictions_original))
 print(mean_absolute_percentage_error(actuals_original, predictions_original))
 
-# --- EXPORTÁLÁSI SZEKCIÓ A MIKROSZERVÍZHEZ ---
+# --- EXPORTING SECTION FOR THE MICROSERVICE ---
 import joblib
 import os
 
-print("Artefaktumok exportálása a mikroszervíz számára...")
+print("Exporting artifacts for the microservice...")
 os.makedirs('export', exist_ok=True)
 
-# 1. A modell súlyainak mentése
+# 1. Saving the model weights
 torch.save(model.state_dict(), 'export/mlp_model.pth')
 
-# 2. Skálázók és kódolók mentése
+# 2. Saving the scalers and encoders
 joblib.dump(encoder, 'export/one_hot_encoder.joblib')
 joblib.dump(scaler, 'export/min_max_scaler.joblib')
 
-# 3. Csoportstatisztikák kimentése a visszaskálázáshoz
-# Újraszámoljuk a scale_prices logika alapján az exportáláshoz
+# 3. Saving group statistics for inverse transformation
+# We recalculate the scale_prices logic for export purposes
 freq = dataset['model'].value_counts()
 temp_group_name = dataset['model'].where(freq[dataset['model']] >= 20, dataset['marca'])
 group_stats_df = dataset.groupby(temp_group_name)['pret'].agg(['mean', 'std']).rename(
@@ -226,7 +226,7 @@ group_stats_df = dataset.groupby(temp_group_name)['pret'].agg(['mean', 'std']).r
 )
 joblib.dump(group_stats_df.to_dict('index'), 'export/group_stats.joblib')
 
-# 4. A végső oszlopnevek sorrendjének mentése (Kritikus a predikciónál!)
+# 4. Saving the final column names order (Critical for prediction)
 joblib.dump(list(X_train_final.columns), 'export/feature_columns.joblib')
 
-print("Exportálás sikeres! Másold az 'export' mappát a prediction-service gyökerébe.")
+print("Exporting artifacts successful! Copy the 'export' folder to the root of the prediction-service.")

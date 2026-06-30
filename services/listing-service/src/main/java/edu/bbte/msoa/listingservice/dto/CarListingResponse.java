@@ -2,6 +2,7 @@ package edu.bbte.msoa.listingservice.dto;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 public record CarListingResponse(
         Long id,
@@ -20,6 +21,8 @@ public record CarListingResponse(
         String addons,
         String description,
         BigDecimal price,
+        String primaryImageUrl,
+        List<String> imageUrls,
         Instant createdAt
 ) {
 }

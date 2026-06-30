@@ -1,6 +1,6 @@
 services:
   # ==========================================
-  # 1. ADATBÁZISOK ÉS INFRASTRUKTÚRA
+  # 1. DATABASES AND CACHE
   # ==========================================
 
   user-db:
@@ -17,6 +17,11 @@ services:
       - user-db-data:/var/lib/postgresql/data
     networks:
       - car-market-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d userdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   listing-db:
     image: postgres:16-alpine
@@ -32,6 +37,11 @@ services:
       - listing-db-data:/var/lib/postgresql/data
     networks:
       - car-market-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U listing -d listingdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   cache-service:
     build:
@@ -42,9 +52,35 @@ services:
       - "6379:6379"
     networks:
       - car-market-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=password123
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - car-market-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # ==========================================
-  # 2. MIKROSZERVÍZEK (ALKALMAZÁSOK)
+  # 2. MICROSERVICES
   # ==========================================
 
   user-service:
@@ -97,11 +133,12 @@ services:
       - car-market-net
 
 # ==========================================
-# 3. KÖTETEK ÉS HÁLÓZATOK DEFINIÁLÁSA
+# 3. VOLUMES AND NETWORKS DEFINITION
 # ==========================================
 volumes:
   user-db-data:
   listing-db-data:
+  minio-data:
 
 networks:
   car-market-net:
