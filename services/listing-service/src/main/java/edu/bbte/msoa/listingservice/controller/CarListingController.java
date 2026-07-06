@@ -2,53 +2,59 @@ package edu.bbte.msoa.listingservice.controller;
 
 import edu.bbte.msoa.listingservice.dto.CarListingRequest;
 import edu.bbte.msoa.listingservice.dto.CarListingResponse;
+import edu.bbte.msoa.listingservice.dto.PredictionRequest;
 import edu.bbte.msoa.listingservice.service.CarListingService;
 import edu.bbte.msoa.listingservice.service.ImageStorageService;
+import edu.bbte.msoa.listingservice.service.PredictionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/cars")
 public class CarListingController {
 
-    private final CarListingService service;
+    private final CarListingService carListingService;
     private final ImageStorageService imageStorageService;
+    private final PredictionService predictionService;
 
-    public CarListingController(CarListingService service, ImageStorageService imageStorageService) {
-        this.service = service;
+    public CarListingController(CarListingService carListingService, ImageStorageService imageStorageService, PredictionService predictionService) {
+        this.carListingService = carListingService;
         this.imageStorageService = imageStorageService;
+        this.predictionService = predictionService;
     }
 
     @GetMapping
     public List<CarListingResponse> findAll() {
-        return service.findAll();
+        return carListingService.findAll();
     }
 
     @GetMapping("/{id}")
     public CarListingResponse findById(@PathVariable Long id) {
-        return service.findById(id);
+        return carListingService.findById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CarListingResponse create(@Valid @RequestBody CarListingRequest request) {
-        return service.create(request);
+        return carListingService.create(request);
     }
 
     @PutMapping("/{id}")
     public CarListingResponse update(@PathVariable Long id, @Valid @RequestBody CarListingRequest request) {
-        return service.update(id, request);
+        return carListingService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
-        service.delete(id);
+        carListingService.delete(id);
     }
 
     @PostMapping("/{id}/images")
@@ -66,7 +72,7 @@ public class CarListingController {
                     String imageUrl = imageStorageService.uploadImage(file);
 
                     boolean isPrimary = (i == primaryIndex);
-                    response = service.addImageToListing(id, imageUrl, isPrimary);
+                    response = carListingService.addImageToListing(id, imageUrl, isPrimary);
                 }
             }
         } catch (IOException e) {
@@ -79,12 +85,18 @@ public class CarListingController {
     @DeleteMapping("/{id}/images/{imageId}")
     public CarListingResponse deleteImage(@PathVariable Long id, @PathVariable Long imageId) {
         // 1. Get the image URL from the listing service
-        String imageUrl = service.getImageUrl(id, imageId);
+        String imageUrl = carListingService.getImageUrl(id, imageId);
 
         // 2. Delete the image from the storage service
         imageStorageService.deleteImage(imageUrl);
 
         // 3. Remove the image from the listing in the listing service
-        return service.removeImageFromListing(id, imageId);
+        return carListingService.removeImageFromListing(id, imageId);
+    }
+
+    @PostMapping("/predict-price")
+    public Map<String, BigDecimal> predictPrice(@Valid @RequestBody PredictionRequest request) {
+        BigDecimal predictedPrice = predictionService.getPredictedPrice(request);
+        return Map.of("suggestedPrice", predictedPrice);
     }
 }

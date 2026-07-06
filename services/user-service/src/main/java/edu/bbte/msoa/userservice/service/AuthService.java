@@ -3,6 +3,7 @@ package edu.bbte.msoa.userservice.service;
 import edu.bbte.msoa.userservice.dto.AuthRequest;
 import edu.bbte.msoa.userservice.dto.AuthResponse;
 import edu.bbte.msoa.userservice.dto.RegisterRequest;
+import edu.bbte.msoa.userservice.exception.UserAlreadyExistsException;
 import edu.bbte.msoa.userservice.model.User;
 import edu.bbte.msoa.userservice.repository.UserRepository;
 import edu.bbte.msoa.userservice.security.JwtUtil;
@@ -31,30 +32,32 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.username(), request.password())
         );
 
+        var user = userRepository.findByUsername(request.username())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         var userDetails = org.springframework.security.core.userdetails.User.withUsername(request.username())
                 .password("")
                 .authorities("ROLE_USER")
                 .build();
 
-        return new AuthResponse(jwtUtil.generateToken(userDetails));
+        return new AuthResponse(jwtUtil.generateToken(userDetails, user.getId()));
     }
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.username()) || userRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("User already exists");
+            throw new UserAlreadyExistsException("User already exists");
         }
 
         User user = new User();
         user.setUsername(request.username());
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
-        userRepository.save(user);
+        user = userRepository.save(user);
 
         var userDetails = org.springframework.security.core.userdetails.User.withUsername(user.getUsername())
                 .password(user.getPassword())
                 .roles("ROLE_USER")
                 .build();
 
-        return new AuthResponse(jwtUtil.generateToken(userDetails));
+        return new AuthResponse(jwtUtil.generateToken(userDetails, user.getId()));
     }
 }

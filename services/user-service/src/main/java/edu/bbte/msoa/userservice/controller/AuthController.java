@@ -5,13 +5,11 @@ import edu.bbte.msoa.userservice.dto.AuthResponse;
 import edu.bbte.msoa.userservice.dto.RegisterRequest;
 import edu.bbte.msoa.userservice.service.AuthService;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-@Slf4j
 public class AuthController {
 
     private final AuthService authService;

@@ -4,7 +4,6 @@ import edu.bbte.msoa.userservice.dto.UserRequest;
 import edu.bbte.msoa.userservice.dto.UserResponse;
 import edu.bbte.msoa.userservice.service.UserService;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
-@Slf4j
 public class UserController {
 
     private final UserService userService;

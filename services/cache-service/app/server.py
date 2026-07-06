@@ -113,7 +113,7 @@ class Server:
                 commands_with_bytes, remaining_buffer = self.command_parser.parse_commands(buffer)
 
                 if not commands_with_bytes:
-                    data = connection.recv(1024)
+                    data = connection.recv(4096)
                     if not data:
                         break
                     buffer += data
@@ -166,7 +166,7 @@ class Server:
         # Handshake steps
         ping_command = b"*1\r\n$4\r\nPING\r\n"
         master_socket.sendall(ping_command)
-        response = master_socket.recv(1024)
+        response = master_socket.recv(4096)
         if response != b"+PONG\r\n":
             print("Failed to receive PONG from master")
             return False
@@ -174,14 +174,14 @@ class Server:
         replconf_command = "*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n" \
                           f"${len(str(replica_port))}\r\n{replica_port}\r\n"
         master_socket.sendall(replconf_command.encode())
-        response = master_socket.recv(1024)
+        response = master_socket.recv(4096)
         if response != b"+OK\r\n":
             print("Failed to receive OK from master for REPLCONF")
             return False
 
         replconf_command = b"*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n"
         master_socket.sendall(replconf_command)
-        response = master_socket.recv(1024)
+        response = master_socket.recv(4096)
         if response != b"+OK\r\n":
             print("Failed to receive OK from master for REPLCONF capa")
             return False
@@ -298,7 +298,14 @@ class Server:
         value = self.string_store.get(key)
         if value is None:
             return connection.sendall(b"$-1\r\n")
-        return connection.sendall(f"${len(value)}\r\n{value}\r\n".encode())
+        # return connection.sendall(f"${len(value)}\r\n{value}\r\n".encode())
+        if isinstance(value, str):
+            value_bytes = value.encode('utf-8')
+        else:
+            value_bytes = value
+            
+        header = f"${len(value_bytes)}\r\n".encode('utf-8')
+        return connection.sendall(header + value_bytes + b"\r\n")
 
     def handle_rpush(self, connection, command):
         if len(command) < 2:
@@ -683,7 +690,7 @@ class Server:
     def enter_subscription_mode(self, connection):
         while True:
             try:
-                data = connection.recv(1024)
+                data = connection.recv(4096)
                 if not data:
                     break  # Connection closed
                 # Ignore any commands while in subscription mode

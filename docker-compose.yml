@@ -6,7 +6,7 @@ services:
   user-db:
     image: postgres:16-alpine
     container_name: user-db
-    restart: always
+    # restart: always
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: userpass
@@ -26,7 +26,7 @@ services:
   listing-db:
     image: postgres:16-alpine
     container_name: listing-db
-    restart: always
+    # restart: always
     environment:
       POSTGRES_USER: listing
       POSTGRES_PASSWORD: listingpass
@@ -47,7 +47,7 @@ services:
     build:
       context: ./services/cache-service
     container_name: cache-service
-    restart: always
+    # restart: always
     ports:
       - "6379:6379"
     networks:
@@ -61,7 +61,7 @@ services:
   minio:
     image: minio/minio:latest
     container_name: minio
-    restart: always
+    # restart: always
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -87,15 +87,15 @@ services:
     build:
       context: ./services/user-service
     container_name: user-service
-    restart: on-failure
+    # restart: on-failure
     depends_on:
       - user-db
     ports:
       - "8081:8081"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://user-db:5432/userdb
-      - SPRING_DATASOURCE_USERNAME=userdbadmin
-      - SPRING_DATASOURCE_PASSWORD=userdbpass
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=userpass
       - JWT_SECRET=RQJJ0FU7aM+A7OVIEErAIBdebegP+mjt4HCE6bPqJQA=
     networks:
       - car-market-net
@@ -104,7 +104,7 @@ services:
     build:
       context: ./services/listing-service
     container_name: listing-service
-    restart: on-failure
+    # restart: on-failure
     depends_on:
       - listing-db
       - cache-service
@@ -126,7 +126,7 @@ services:
     build:
       context: ./services/prediction-service
     container_name: prediction-service
-    restart: always
+    # restart: always
     ports:
       - "8083:8083"
     networks:

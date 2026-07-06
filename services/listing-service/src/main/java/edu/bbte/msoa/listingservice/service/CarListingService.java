@@ -2,6 +2,7 @@ package edu.bbte.msoa.listingservice.service;
 
 import edu.bbte.msoa.listingservice.dto.CarListingRequest;
 import edu.bbte.msoa.listingservice.dto.CarListingResponse;
+import edu.bbte.msoa.listingservice.dto.ImageDto;
 import edu.bbte.msoa.listingservice.model.CarImage;
 import edu.bbte.msoa.listingservice.model.CarListing;
 import edu.bbte.msoa.listingservice.repository.CarListingRepository;
@@ -9,6 +10,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
@@ -24,29 +27,30 @@ public class CarListingService {
         return repository.findAll().stream().map(this::toResponse).toList();
     }
 
-    @Cacheable(value = "cars", key = "#id")
+    @Cacheable(value = "cars_v2", key = "#id")
     public CarListingResponse findById(Long id) {
         return toResponse(repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Listing not found")));
     }
 
     public CarListingResponse create(CarListingRequest request) {
         CarListing listing = toEntity(new CarListing(), request);
+        listing.setUserId(currentUserId());
         return toResponse(repository.save(listing));
     }
 
-    @CacheEvict(value = "cars", key = "#id")
+    @CacheEvict(value = "cars_v2", key = "#id")
     public CarListingResponse update(Long id, CarListingRequest request) {
         CarListing listing = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Listing not found"));
         return toResponse(repository.save(toEntity(listing, request)));
     }
 
-    @CacheEvict(value = "cars", key = "#id")
+    @CacheEvict(value = "cars_v2", key = "#id")
     public void delete(Long id) {
         repository.deleteById(id);
     }
 
     @Transactional
-    @CacheEvict(value = "cars", key = "#id")
+    @CacheEvict(value = "cars_v2", key = "#id")
     public CarListingResponse addImageToListing(Long id, String imageUrl, boolean isPrimary) {
         CarListing listing = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Listing not found"));
@@ -64,7 +68,7 @@ public class CarListingService {
     }
 
     @Transactional
-    @CacheEvict(value = "cars", key = "#id")
+    @CacheEvict(value = "cars_v2", key = "#id")
     public CarListingResponse removeImageFromListing(Long id, Long imageId) {
         CarListing listing = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Listing not found"));
@@ -122,8 +126,8 @@ public class CarListingService {
                 .findFirst()
                 .orElse(null);
 
-        List<String> allUrls = listing.getImages().stream()
-                .map(CarImage::getImageUrl)
+        List<ImageDto> imageDtos = listing.getImages().stream()
+                .map(img -> new ImageDto(img.getId(), img.getImageUrl(), img.getIsPrimary()))
                 .toList();
 
         return new CarListingResponse(
@@ -144,8 +148,28 @@ public class CarListingService {
                 listing.getDescription(),
                 listing.getPrice(),
                 primaryUrl,
-                allUrls,
+                imageDtos,
                 listing.getCreatedAt()
         );
+    }
+
+    private Long currentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new IllegalStateException("Authenticated user id is required");
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof Long userId) {
+            return userId;
+        }
+        if (principal instanceof Number number) {
+            return number.longValue();
+        }
+        if (principal instanceof String value && !value.isBlank()) {
+            return Long.valueOf(value);
+        }
+
+        throw new IllegalStateException("Authenticated user id is required");
     }
 }

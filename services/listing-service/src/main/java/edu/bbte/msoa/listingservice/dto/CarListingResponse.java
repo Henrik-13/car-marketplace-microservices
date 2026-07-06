@@ -22,7 +22,7 @@ public record CarListingResponse(
         String description,
         BigDecimal price,
         String primaryImageUrl,
-        List<String> imageUrls,
+        List<ImageDto> images,
         Instant createdAt
 ) {
 }

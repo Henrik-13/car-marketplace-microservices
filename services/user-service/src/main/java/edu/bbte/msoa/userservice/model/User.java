@@ -7,9 +7,9 @@ import lombok.Setter;
 import java.time.Instant;
 
 @Entity
-@Table(name = "users")
 @Getter
 @Setter
+@Table(name = "users")
 public class User {
 
     @Id
