@@ -1,0 +1,71 @@
+do_token = "dop_v1_your_digitalocean_api_token_here"
+
+# Replace this with the public SSH key you will use to log in to both droplets.
+ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExamplePublicKey car-marketplace"
+
+project_name = "car-marketplace-phase-3"
+name_prefix  = "car-marketplace"
+region       = "fra1"
+size         = "s-2vcpu-4gb"
+image        = "ubuntu-24-04-x64"
+vpc_cidr     = "10.20.0.0/16"
+k3s_version  = ""
+tags         = ["car-marketplace", "phase-1", "k3s"]
+
+domain_name              = "example.com"
+api_subdomain            = "api"
+grafana_subdomain        = "grafana"
+prometheus_subdomain     = "prometheus"
+letsencrypt_email        = "admin@example.com"
+spaces_access_id         = "dop_v1_spaces_access_key_id"
+spaces_secret_key        = "dop_v1_spaces_secret_key"
+spaces_endpoint          = "https://fra1.digitaloceanspaces.com"
+spaces_bucket_name       = "car-marketplace-images"
+spaces_region            = "fra1"
+kubeconfig_path          = "C:/Users/YourUser/.kube/config"
+kubeconfig_context       = null
+cert_manager_namespace   = "cert-manager"
+app_namespace            = "car-marketplace"
+monitoring_namespace     = "monitoring"
+database_namespace       = "databases"
+storage_namespace        = "storage"
+traefik_ingress_class_name = "traefik"
+cert_manager_chart_version = "v1.15.3"
+
+app_image        = "ghcr.io/car-marketplace/user-service:latest"
+listing_image    = "ghcr.io/car-marketplace/listing-service:latest"
+prediction_image = "ghcr.io/car-marketplace/prediction-service:latest"
+cache_image      = "ghcr.io/car-marketplace/cache-service:latest"
+
+user_service_jwt_secret = "change-me"
+user_db_password        = "change-me"
+listing_db_password     = "change-me"
+cache_auth_token        = "change-me"
+
+user_db_username    = "user"
+user_db_name        = "userdb"
+listing_db_username = "listing"
+listing_db_name     = "listingdb"
+
+user_service_replicas     = 2
+listing_service_replicas  = 2
+prediction_service_replicas = 1
+cache_service_replicas    = 1
+
+postgres_image            = "postgres:16-alpine"
+postgres_storage_size     = "10Gi"
+resource_cpu_request      = "100m"
+resource_cpu_limit        = "1000m"
+resource_memory_request   = "256Mi"
+resource_memory_limit     = "2Gi"
+postgres_resource_requests_cpu    = "100m"
+postgres_resource_limits_cpu      = "500m"
+postgres_resource_requests_memory  = "256Mi"
+postgres_resource_limits_memory    = "1Gi"
+prediction_model_path     = "/app/export"
+prediction_cache_host     = "cache-service"
+prediction_cache_port     = 6379
+prediction_api_port       = 8083
+cache_port                = 6379
+grafana_admin_password    = "change-me"
+

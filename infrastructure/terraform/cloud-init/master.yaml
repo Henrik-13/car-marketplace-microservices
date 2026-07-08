@@ -1,0 +1,43 @@
+#cloud-config
+package_update: true
+packages:
+  - curl
+  - ca-certificates
+
+users:
+  - name: ubuntu
+    gecos: Ubuntu
+    groups:
+      - adm
+      - sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+
+write_files:
+  - path: /usr/local/bin/install-k3s-master.sh
+    owner: root:root
+    permissions: "0755"
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      PRIVATE_IP="$(curl -fsSL http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address)"
+
+      if [ -n "${k3s_version}" ]; then
+        export INSTALL_K3S_VERSION="${k3s_version}"
+      fi
+
+      curl -sfL https://get.k3s.io | \
+        K3S_TOKEN="${k3s_token}" \
+        INSTALL_K3S_EXEC="server --node-ip $PRIVATE_IP --advertise-address $PRIVATE_IP --tls-san ${floating_ip} --write-kubeconfig-mode 644" \
+        sh -
+
+      ln -sf /usr/local/bin/k3s /usr/local/bin/kubectl
+      mkdir -p /home/ubuntu/.kube
+      cp /etc/rancher/k3s/k3s.yaml /home/ubuntu/.kube/config
+      chown -R ubuntu:ubuntu /home/ubuntu/.kube
+
+runcmd:
+  - [bash, -lc, /usr/local/bin/install-k3s-master.sh]
