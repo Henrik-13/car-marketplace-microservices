@@ -1,6 +1,7 @@
 import socket
 import threading
 import time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from app.parsers.command_parser import CommandParser
 from app.parsers.rdb_parser import RDBParser
@@ -18,6 +19,7 @@ class Server:
 
     def __init__(self, args):
         self.args = args
+        self.health_port = getattr(args, "health_port", 8080)
         self.command_parser = CommandParser()
         self.string_store = StringStore()
         self.list_store = ListStore()
@@ -43,6 +45,24 @@ class Server:
         self.dir = args.dir
         self.dbfilename = args.dbfilename
 
+    def start_health_server(self):
+        class HealthHandler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                if self.path == "/ping":
+                    self.send_response(200)
+                    self.send_header("Content-Type", "text/plain")
+                    self.end_headers()
+                    self.wfile.write(b"PONG")
+                else:
+                    self.send_response(404)
+                    self.end_headers()
+
+            def log_message(self, format, *args):
+                return
+
+        server = ThreadingHTTPServer(("0.0.0.0", int(self.health_port)), HealthHandler)
+        server.serve_forever()
+
         self.command_handlers = {
             "PING": self.handle_ping, "ECHO": self.handle_echo, "SET": self.handle_set,
             "GET": self.handle_get, "RPUSH": self.handle_rpush, "LRANGE": self.handle_lrange,
@@ -58,6 +78,8 @@ class Server:
         }
 
     def start(self):
+        threading.Thread(target=self.start_health_server, daemon=True).start()
+
         if self.replica_of:
             master_host, master_port = self.replica_of.split()
             result = self.connect_to_master(master_host, int(master_port), self.args.port)

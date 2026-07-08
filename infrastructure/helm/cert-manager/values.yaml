@@ -1,0 +1,8 @@
+# Install the CRDs and keep cert-manager lightweight; Terraform manages the namespace and release lifecycle.
+installCRDs: true
+
+prometheus:
+  enabled: false
+
+webhook:
+  timeoutSeconds: 30

@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prediction-service
+  namespace: car-marketplace
+  labels:
+    app.kubernetes.io/name: prediction-service
+    app.kubernetes.io/part-of: car-marketplace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prediction-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prediction-service
+        app.kubernetes.io/part-of: car-marketplace
+    spec:
+      containers:
+        - name: prediction-service
+          image: ghcr.io/henrik-13/prediction-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8083
+              name: http
+          envFrom:
+            - configMapRef:
+                name: prediction-service-config
+            - secretRef:
+                name: prediction-service-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8083
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8083
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8083
+            failureThreshold: 30
+            periodSeconds: 10

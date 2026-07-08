@@ -41,6 +41,11 @@ class CarRequest(BaseModel):
 
 app = FastAPI(title="Used Car Price Prediction API")
 
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
 # Globális változók
 device = torch.device('cpu') # A mikroszervíz CPU-n fut
 ml_model = None
@@ -57,7 +62,7 @@ def load_artifacts():
     global ml_model, encoder, scaler, group_stats, feature_columns
     try:
         base_dir = os.path.dirname(os.path.dirname(__file__))
-        export_dir = os.path.join(base_dir, 'export')
+        export_dir = os.getenv("MODEL_EXPORT_DIR", os.path.join(base_dir, 'export'))
 
         encoder = joblib.load(os.path.join(export_dir, 'one_hot_encoder.joblib'))
         scaler = joblib.load(os.path.join(export_dir, 'min_max_scaler.joblib'))

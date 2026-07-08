@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: listing-service
+  namespace: car-marketplace
+  labels:
+    app.kubernetes.io/name: listing-service
+    app.kubernetes.io/part-of: car-marketplace
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: listing-service
+  ports:
+    - name: http
+      port: 8082
+      targetPort: 8082

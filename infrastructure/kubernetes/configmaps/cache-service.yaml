@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cache-service-config
+  namespace: car-marketplace
+  labels:
+    app.kubernetes.io/name: cache-service
+    app.kubernetes.io/part-of: car-marketplace
+data:
+  CACHE_PORT: "6379"
+  CACHE_EVICTION_POLICY: "allkeys-lru"
+  CACHE_MAX_MEMORY: "256mb"
+  HEALTH_PORT: "8080"

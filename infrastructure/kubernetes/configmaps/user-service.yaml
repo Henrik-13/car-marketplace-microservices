@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-service-config
+  namespace: car-marketplace
+  labels:
+    app.kubernetes.io/name: user-service
+    app.kubernetes.io/part-of: car-marketplace
+data:
+  SERVER_PORT: "8081"
+  SPRING_PROFILES_ACTIVE: "prod"
+  LOGGING_LEVEL_ROOT: "INFO"

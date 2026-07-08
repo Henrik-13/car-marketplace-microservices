@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: listing-db
+  namespace: databases
+  labels:
+    app.kubernetes.io/name: listing-db
+    app.kubernetes.io/part-of: car-marketplace
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: listing-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432

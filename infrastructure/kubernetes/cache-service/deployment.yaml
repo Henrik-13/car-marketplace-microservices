@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache-service
+  namespace: car-marketplace
+  labels:
+    app.kubernetes.io/name: cache-service
+    app.kubernetes.io/part-of: car-marketplace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cache-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cache-service
+        app.kubernetes.io/part-of: car-marketplace
+    spec:
+      containers:
+        - name: cache-service
+          image: ghcr.io/henrik-13/cache-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+              name: redis
+            - containerPort: 8080
+              name: health
+          envFrom:
+            - configMapRef:
+                name: cache-service-config
+            - secretRef:
+                name: cache-service-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 20

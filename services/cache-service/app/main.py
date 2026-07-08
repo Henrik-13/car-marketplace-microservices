@@ -5,6 +5,7 @@ from app.server import Server
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=6379, help="Port to listen on")
+    parser.add_argument("--health-port", type=int, default=8080, help="HTTP health port to expose /ping")
     parser.add_argument("--replicaof", type=str, help="Replication source in host port format")
     parser.add_argument("--dir", type=str, help="Directory for persistence files")
     parser.add_argument("--dbfilename", type=str, help="RDB filename")
