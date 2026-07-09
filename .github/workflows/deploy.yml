@@ -66,13 +66,20 @@ jobs:
         env:
           KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64 }}
         run: |
-          if (-not $env:KUBECONFIG_B64) {
-            throw 'Missing KUBECONFIG_B64 secret.'
-          }
-
           $kubeDir = Join-Path $HOME '.kube'
           New-Item -ItemType Directory -Force -Path $kubeDir | Out-Null
-          [System.IO.File]::WriteAllBytes((Join-Path $kubeDir 'config'), [System.Convert]::FromBase64String($env:KUBECONFIG_B64))
+
+          if ($env:KUBECONFIG_B64) {
+            [System.IO.File]::WriteAllBytes((Join-Path $kubeDir 'config'), [System.Convert]::FromBase64String($env:KUBECONFIG_B64))
+            return
+          }
+
+          $repoKubeconfig = Join-Path $env:GITHUB_WORKSPACE 'infrastructure/terraform/kubeconfig.yaml'
+          if (-not (Test-Path $repoKubeconfig)) {
+            throw 'Missing KUBECONFIG_B64 secret and fallback kubeconfig file infrastructure/terraform/kubeconfig.yaml.'
+          }
+
+          Copy-Item $repoKubeconfig (Join-Path $kubeDir 'config') -Force
 
       - name: Build, push and deploy
         shell: pwsh
