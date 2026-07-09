@@ -20,7 +20,7 @@ spec:
       containers:
         - name: listing-service
           image: ghcr.io/henrik-13/listing-service:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8082
               name: http
@@ -38,19 +38,19 @@ spec:
               memory: 2Gi
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8082
             initialDelaySeconds: 20
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/liveness
               port: 8082
             initialDelaySeconds: 40
             periodSeconds: 20
           startupProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/liveness
               port: 8082
             failureThreshold: 30
             periodSeconds: 10

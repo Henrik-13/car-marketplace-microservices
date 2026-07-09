@@ -41,6 +41,20 @@ class Server:
         self.master_repl_offset_lock = threading.Lock()
         self.replica_offset = 0
         self.write_commands = {"SET", "DEL", "INCR", "DECR", "RPUSH", "LPUSH", "LPOP", "XADD", "ZADD"}
+        # Register command handlers before the server threads start accepting clients.
+        self.command_handlers = {
+            "PING": self.handle_ping, "ECHO": self.handle_echo, "SET": self.handle_set,
+            "GET": self.handle_get, "RPUSH": self.handle_rpush, "LRANGE": self.handle_lrange,
+            "LPUSH": self.handle_lpush, "LLEN": self.handle_llen, "LPOP": self.handle_lpop,
+            "BLPOP": self.handle_blpop, "TYPE": self.handle_type, "XADD": self.handle_xadd,
+            "XRANGE": self.handle_xrange, "XREAD": self.handle_xread, "INCR": self.handle_incr,
+            "INFO": self.handle_info, "REPLCONF": self.handle_replconf, "PSYNC": self.handle_psync,
+            "WAIT": self.handle_wait, "CONFIG": self.handle_config, "KEYS": self.handle_keys,
+            "SUBSCRIBE": self.handle_subscribe, "PUBLISH": self.handle_publish, "ZADD": self.handle_zadd,
+            "ZRANK": self.handle_zrank, "ZRANGE": self.handle_zrange, "ZCARD": self.handle_zcard,
+            "ZSCORE": self.handle_zscore, "ZREM": self.handle_zrem, "GEOADD": self.handle_geoadd,
+            "GEOPOS": self.handle_geopos, "GEODIST": self.handle_geodist, "GEOSEARCH": self.handle_geosearch,
+        }
 
         self.dir = args.dir
         self.dbfilename = args.dbfilename
@@ -62,20 +76,6 @@ class Server:
 
         server = ThreadingHTTPServer(("0.0.0.0", int(self.health_port)), HealthHandler)
         server.serve_forever()
-
-        self.command_handlers = {
-            "PING": self.handle_ping, "ECHO": self.handle_echo, "SET": self.handle_set,
-            "GET": self.handle_get, "RPUSH": self.handle_rpush, "LRANGE": self.handle_lrange,
-            "LPUSH": self.handle_lpush, "LLEN": self.handle_llen, "LPOP": self.handle_lpop,
-            "BLPOP": self.handle_blpop, "TYPE": self.handle_type, "XADD": self.handle_xadd,
-            "XRANGE": self.handle_xrange, "XREAD": self.handle_xread, "INCR": self.handle_incr,
-            "INFO": self.handle_info, "REPLCONF": self.handle_replconf, "PSYNC": self.handle_psync,
-            "WAIT": self.handle_wait, "CONFIG": self.handle_config, "KEYS": self.handle_keys,
-            "SUBSCRIBE": self.handle_subscribe, "PUBLISH": self.handle_publish, "ZADD": self.handle_zadd,
-            "ZRANK": self.handle_zrank, "ZRANGE": self.handle_zrange, "ZCARD": self.handle_zcard,
-            "ZSCORE": self.handle_zscore, "ZREM": self.handle_zrem, "GEOADD": self.handle_geoadd,
-            "GEOPOS": self.handle_geopos, "GEODIST": self.handle_geodist, "GEOSEARCH": self.handle_geosearch,
-        }
 
     def start(self):
         threading.Thread(target=self.start_health_server, daemon=True).start()

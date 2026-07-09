@@ -8,5 +8,6 @@ metadata:
     app.kubernetes.io/part-of: car-marketplace
 data:
   SERVER_PORT: "8081"
-  SPRING_PROFILES_ACTIVE: "prod"
+  # SPRING_PROFILES_ACTIVE: "prod"
   LOGGING_LEVEL_ROOT: "INFO"
+  # SPRING_JPA_DATABASE_PLATFORM: "org.hibernate.dialect.PostgreSQLDialect"

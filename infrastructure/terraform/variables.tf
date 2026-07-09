@@ -365,25 +365,25 @@ variable "cache_auth_token" {
 variable "user_service_image" {
   description = "Container image for the user-service deployment."
   type        = string
-  default     = "ghcr.io/car-marketplace/user-service:latest"
+  default     = "ghcr.io/henrik-13/user-service:latest"
 }
 
 variable "listing_service_image" {
   description = "Container image for the listing-service deployment."
   type        = string
-  default     = "ghcr.io/car-marketplace/listing-service:latest"
+  default     = "ghcr.io/henrik-13/listing-service:latest"
 }
 
 variable "prediction_service_image" {
   description = "Container image for the prediction-service deployment."
   type        = string
-  default     = "ghcr.io/car-marketplace/prediction-service:latest"
+  default     = "ghcr.io/henrik-13/prediction-service:latest"
 }
 
 variable "cache_service_image" {
   description = "Container image for the cache-service deployment."
   type        = string
-  default     = "ghcr.io/car-marketplace/cache-service:latest"
+  default     = "ghcr.io/henrik-13/cache-service:latest"
 }
 
 variable "postgres_image" {

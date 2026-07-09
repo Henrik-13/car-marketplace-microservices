@@ -4,16 +4,15 @@ metadata:
   name: api-ingress
   namespace: car-marketplace
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: https-redirect@kubernetescrd
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - api.example.com
-      secretName: api-example-com-tls
+        - api.146.190.205.209.nip.io
+      secretName: api-146-190-205-209-nip-io-tls
   rules:
-    - host: api.example.com
+    - host: api.146.190.205.209.nip.io
       http:
         paths:
           - path: /auth
@@ -23,10 +22,17 @@ spec:
                 name: user-service
                 port:
                   number: 8081
-          - path: /listings
+          - path: /cars
             pathType: Prefix
             backend:
               service:
                 name: listing-service
                 port:
                   number: 8082
+          - path: /predict
+            pathType: Prefix
+            backend:
+              service:
+                name: prediction-service
+                port:
+                  number: 8083

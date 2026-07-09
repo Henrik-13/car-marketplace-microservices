@@ -36,7 +36,7 @@ write_files:
       curl -sfL https://get.k3s.io | \
         K3S_URL="https://${master_private_ip}:6443" \
         K3S_TOKEN="${k3s_token}" \
-        INSTALL_K3S_EXEC="agent --node-ip $PRIVATE_IP" \
+        INSTALL_K3S_EXEC="agent --node-ip $PRIVATE_IP --flannel-iface=eth1" \
         sh -
 
 runcmd:

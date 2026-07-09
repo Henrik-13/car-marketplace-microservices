@@ -8,6 +8,4 @@ metadata:
     app.kubernetes.io/part-of: car-marketplace
 data:
   MODEL_EXPORT_DIR: /app/export
-  CACHE_HOST: cache-service.car-marketplace.svc.cluster.local
-  CACHE_PORT: "6379"
   API_PORT: "8083"

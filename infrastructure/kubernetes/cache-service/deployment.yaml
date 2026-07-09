@@ -20,7 +20,7 @@ spec:
       containers:
         - name: cache-service
           image: ghcr.io/henrik-13/cache-service:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 6379
               name: redis

@@ -68,6 +68,9 @@ resource "kubernetes_secret_v1" "listing_service" {
     DB_USERNAME     = var.listing_db_username
     DB_PASSWORD     = local.resolved_listing_db_password
     DB_URL          = "jdbc:postgresql://listing-db.${kubernetes_namespace_v1.databases.metadata[0].name}.svc.cluster.local:5432/${var.listing_db_name}"
+    DB_HOST         = "listing-db.${kubernetes_namespace_v1.databases.metadata[0].name}.svc.cluster.local"
+    DB_PORT         = "5432"
+    DB_NAME         = var.listing_db_name
     S3_ACCESS_KEY   = digitalocean_spaces_key.listing_service.access_key
     S3_SECRET_KEY   = digitalocean_spaces_key.listing_service.secret_key
     S3_BUCKET_NAME  = digitalocean_spaces_bucket.listing_images.name
@@ -91,8 +94,6 @@ resource "kubernetes_secret_v1" "prediction_service" {
 
   data = {
     MODEL_EXPORT_DIR = "/app/export"
-    CACHE_HOST       = "cache-service.${kubernetes_namespace_v1.app.metadata[0].name}.svc.cluster.local"
-    CACHE_PORT       = "6379"
   }
 
   depends_on = [kubernetes_namespace_v1.app]

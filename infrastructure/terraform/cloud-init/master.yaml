@@ -31,7 +31,7 @@ write_files:
 
       curl -sfL https://get.k3s.io | \
         K3S_TOKEN="${k3s_token}" \
-        INSTALL_K3S_EXEC="server --node-ip $PRIVATE_IP --advertise-address $PRIVATE_IP --tls-san ${floating_ip} --write-kubeconfig-mode 644" \
+        INSTALL_K3S_EXEC="server --node-ip $PRIVATE_IP --advertise-address $PRIVATE_IP --tls-san ${floating_ip} --write-kubeconfig-mode 644 --flannel-iface=eth1" \
         sh -
 
       ln -sf /usr/local/bin/k3s /usr/local/bin/kubectl

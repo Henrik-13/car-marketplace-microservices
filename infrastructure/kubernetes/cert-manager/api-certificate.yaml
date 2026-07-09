@@ -4,9 +4,9 @@ metadata:
   name: api-example-com
   namespace: car-marketplace
 spec:
-  secretName: api-example-com-tls
+  secretName: api-146-190-205-209-nip-io-tls
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
   dnsNames:
-    - api.example.com
+    - api.146.190.205.209.nip.io
