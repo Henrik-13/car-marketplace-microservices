@@ -8,13 +8,13 @@ provider "digitalocean" {
 provider "kubernetes" {
   config_path    = pathexpand(var.kubeconfig_path)
   config_context = var.kubeconfig_context
-  insecure       = true
+  insecure       = true # for local development only; remove in production
 }
 
 provider "helm" {
   kubernetes {
     config_path    = pathexpand(var.kubeconfig_path)
     config_context = var.kubeconfig_context
-    insecure       = true
+    insecure       = true # for local development only; remove in production
   }
 }
