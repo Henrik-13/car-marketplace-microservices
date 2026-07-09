@@ -1,0 +1,80 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Service to deploy
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - user-service
+          - listing-service
+          - prediction-service
+          - cache-service
+      tag:
+        description: Image tag to deploy
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io/henrik-13
+  NAMESPACE: car-marketplace
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve deployment parameters
+        shell: pwsh
+        env:
+          INPUT_SERVICE: ${{ github.event.inputs.service }}
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          $service = if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch' -and $env:INPUT_SERVICE) { $env:INPUT_SERVICE } else { 'all' }
+          $tag = if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch' -and $env:INPUT_TAG) { $env:INPUT_TAG } else { $env:GITHUB_SHA }
+
+          "SERVICE=$service" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TAG=$tag" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Set up kubeconfig
+        shell: pwsh
+        env:
+          KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64 }}
+        run: |
+          if (-not $env:KUBECONFIG_B64) {
+            throw 'Missing KUBECONFIG_B64 secret.'
+          }
+
+          $kubeDir = Join-Path $HOME '.kube'
+          New-Item -ItemType Directory -Force -Path $kubeDir | Out-Null
+          [System.IO.File]::WriteAllBytes((Join-Path $kubeDir 'config'), [System.Convert]::FromBase64String($env:KUBECONFIG_B64))
+
+      - name: Build, push and deploy
+        shell: pwsh
+        run: |
+          ./scripts/deploy-services.ps1 -Service $env:SERVICE -Tag $env:TAG -Registry $env:REGISTRY -Namespace $env:NAMESPACE
