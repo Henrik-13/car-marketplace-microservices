@@ -1,26 +1,26 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: grafana-example-com
-  namespace: observability
+  name: grafana-146-190-205-209-nip-io
+  namespace: monitoring
 spec:
-  secretName: grafana-example-com-tls
+  secretName: grafana-146-190-205-209-nip-io-tls
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
   dnsNames:
-    - grafana.example.com
+    - grafana.146.190.205.209.nip.io
 
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: prometheus-example-com
-  namespace: observability
+  name: prometheus-146-190-205-209-nip-io
+  namespace: monitoring
 spec:
-  secretName: prometheus-example-com-tls
+  secretName: prometheus-146-190-205-209-nip-io-tls
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
   dnsNames:
-    - prometheus.example.com
+    - prometheus.146.190.205.209.nip.io

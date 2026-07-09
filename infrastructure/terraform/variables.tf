@@ -9,12 +9,6 @@ variable "ssh_public_key" {
   type        = string
 }
 
-variable "project_name" {
-  description = "Human-readable name used for the Terraform-managed infrastructure."
-  type        = string
-  default     = "car-marketplace-phase-3"
-}
-
 variable "name_prefix" {
   description = "Prefix applied to all DigitalOcean resource names."
   type        = string
@@ -87,11 +81,6 @@ variable "prometheus_subdomain" {
   default     = "prometheus"
 }
 
-variable "letsencrypt_email" {
-  description = "Email address used for the Let's Encrypt production ClusterIssuer."
-  type        = string
-}
-
 variable "spaces_endpoint" {
   description = "DigitalOcean Spaces API endpoint for the configured region."
   type        = string
@@ -140,150 +129,16 @@ variable "storage_namespace" {
   default     = "storage"
 }
 
-variable "traefik_ingress_class_name" {
-  description = "IngressClass name used by the built-in Traefik controller."
-  type        = string
-  default     = "traefik"
-}
-
 variable "cert_manager_chart_version" {
   description = "Pinned cert-manager chart version for reproducible Helm installs."
   type        = string
   default     = "v1.15.3"
 }
 
-variable "app_image" {
-  description = "Container image for the user-service deployment."
-  type        = string
-}
-
-variable "listing_image" {
-  description = "Container image for the listing-service deployment."
-  type        = string
-}
-
-variable "prediction_image" {
-  description = "Container image for the prediction-service deployment."
-  type        = string
-}
-
-variable "cache_image" {
-  description = "Container image for the cache-service deployment."
-  type        = string
-}
-
-variable "app_replicas_user" {
-  description = "Replica count for the user-service deployment."
-  type        = number
-  default     = 2
-}
-
-variable "app_replicas_listing" {
-  description = "Replica count for the listing-service deployment."
-  type        = number
-  default     = 2
-}
-
-variable "app_replicas_prediction" {
-  description = "Replica count for the prediction-service deployment."
-  type        = number
-  default     = 1
-}
-
-variable "app_replicas_cache" {
-  description = "Replica count for the cache-service deployment."
-  type        = number
-  default     = 1
-}
-
-variable "app_resource_requests_cpu" {
-  description = "Default CPU request for application containers."
-  type        = string
-  default     = "100m"
-}
-
-variable "app_resource_limits_cpu" {
-  description = "Default CPU limit for application containers."
-  type        = string
-  default     = "1000m"
-}
-
-variable "app_resource_requests_memory" {
-  description = "Default memory request for application containers."
-  type        = string
-  default     = "256Mi"
-}
-
-variable "app_resource_limits_memory" {
-  description = "Default memory limit for application containers."
-  type        = string
-  default     = "2Gi"
-}
-
-variable "postgres_resource_requests_cpu" {
-  description = "CPU request for PostgreSQL containers."
-  type        = string
-  default     = "100m"
-}
-
-variable "postgres_resource_limits_cpu" {
-  description = "CPU limit for PostgreSQL containers."
-  type        = string
-  default     = "500m"
-}
-
-variable "postgres_resource_requests_memory" {
-  description = "Memory request for PostgreSQL containers."
-  type        = string
-  default     = "256Mi"
-}
-
-variable "postgres_resource_limits_memory" {
-  description = "Memory limit for PostgreSQL containers."
-  type        = string
-  default     = "1Gi"
-}
-
-variable "prediction_model_path" {
-  description = "Path to the mounted prediction model artifacts."
-  type        = string
-  default     = "/app/export"
-}
-
-variable "prediction_cache_host" {
-  description = "Host used by prediction-service for cache access."
-  type        = string
-  default     = "cache-service"
-}
-
-variable "prediction_cache_port" {
-  description = "Port used by prediction-service for cache access."
-  type        = number
-  default     = 6379
-}
-
-variable "prediction_api_port" {
-  description = "Port exposed by the prediction-service container."
-  type        = number
-  default     = 8083
-}
-
-variable "cache_port" {
-  description = "Port exposed by the cache-service container."
-  type        = number
-  default     = 6379
-}
-
 variable "jwt_secret" {
   description = "JWT signing secret shared by user-service and listing-service."
   type        = string
   sensitive   = true
-}
-
-variable "prediction_service_url_internal" {
-  description = "Internal URL used by listing-service to call prediction-service."
-  type        = string
-  default     = "http://prediction-service.car-marketplace.svc.cluster.local:8083/predict"
 }
 
 variable "spaces_region" {
@@ -309,13 +164,6 @@ variable "spaces_secret_key" {
   type        = string
   sensitive   = true
 }
-
-# variable "user_service_jwt_secret" {
-#   description = "JWT signing secret used by the user-service. Leave empty to generate one."
-#   type        = string
-#   default     = null
-#   sensitive   = true
-# }
 
 variable "user_db_username" {
   description = "Database username used by user-service and user-db."
@@ -360,96 +208,6 @@ variable "cache_auth_token" {
   type        = string
   default     = null
   sensitive   = true
-}
-
-variable "user_service_image" {
-  description = "Container image for the user-service deployment."
-  type        = string
-  default     = "ghcr.io/henrik-13/user-service:latest"
-}
-
-variable "listing_service_image" {
-  description = "Container image for the listing-service deployment."
-  type        = string
-  default     = "ghcr.io/henrik-13/listing-service:latest"
-}
-
-variable "prediction_service_image" {
-  description = "Container image for the prediction-service deployment."
-  type        = string
-  default     = "ghcr.io/henrik-13/prediction-service:latest"
-}
-
-variable "cache_service_image" {
-  description = "Container image for the cache-service deployment."
-  type        = string
-  default     = "ghcr.io/henrik-13/cache-service:latest"
-}
-
-variable "postgres_image" {
-  description = "PostgreSQL container image used for both database workloads."
-  type        = string
-  default     = "postgres:16-alpine"
-}
-
-variable "user_service_replicas" {
-  description = "Replica count for the user-service deployment."
-  type        = number
-  default     = 2
-}
-
-variable "listing_service_replicas" {
-  description = "Replica count for the listing-service deployment."
-  type        = number
-  default     = 2
-}
-
-variable "prediction_service_replicas" {
-  description = "Replica count for the prediction-service deployment."
-  type        = number
-  default     = 1
-}
-
-variable "cache_service_replicas" {
-  description = "Replica count for the cache-service deployment."
-  type        = number
-  default     = 1
-}
-
-variable "resource_cpu_request" {
-  description = "Default CPU request for application containers."
-  type        = string
-  default     = "100m"
-}
-
-variable "resource_cpu_limit" {
-  description = "Default CPU limit for application containers."
-  type        = string
-  default     = "1000m"
-}
-
-variable "resource_memory_request" {
-  description = "Default memory request for application containers."
-  type        = string
-  default     = "256Mi"
-}
-
-variable "resource_memory_limit" {
-  description = "Default memory limit for application containers."
-  type        = string
-  default     = "2Gi"
-}
-
-variable "postgres_storage_size" {
-  description = "Persistent volume size for PostgreSQL workloads."
-  type        = string
-  default     = "10Gi"
-}
-
-variable "cache_storage_size" {
-  description = "Optional persistent volume size for cache-service data."
-  type        = string
-  default     = "1Gi"
 }
 
 variable "grafana_admin_password" {

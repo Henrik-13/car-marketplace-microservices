@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
 import torch
 import torch.nn as nn
@@ -6,6 +6,9 @@ import joblib
 import pandas as pd
 import numpy as np
 import os
+import time
+
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 # 1. Modell architektúra (Meg kell egyeznie a betanítottal)
 class MLPRegressorTorch(nn.Module):
@@ -41,10 +44,26 @@ class CarRequest(BaseModel):
 
 app = FastAPI(title="Used Car Price Prediction API")
 
+PREDICTION_REQUESTS = Counter(
+    "prediction_service_requests_total",
+    "Total number of prediction service requests",
+    ["method", "endpoint", "status"]
+)
+PREDICTION_LATENCY = Histogram(
+    "prediction_service_request_duration_seconds",
+    "Prediction service request duration in seconds",
+    ["endpoint"]
+)
+
 
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.get("/metrics")
+def metrics():
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 # Globális változók
 device = torch.device('cpu') # A mikroszervíz CPU-n fut
@@ -79,57 +98,56 @@ def load_artifacts():
 
 @app.post("/predict")
 def predict_price(car: CarRequest):
+    start_time = time.perf_counter()
+    endpoint = "/predict"
+
     if ml_model is None:
+        PREDICTION_REQUESTS.labels("POST", endpoint, "500").inc()
         raise HTTPException(status_code=500, detail="A modell nem töltődött be.")
 
     try:
-        # 1. Bemenet konvertálása DataFrame-mé
         input_data = pd.DataFrame([car.dict()])
-        
-        # 2. Categorical One-Hot Encoding
+
         one_hot_encoded = encoder.transform(input_data[categorical_cols])
         one_hot_columns = encoder.get_feature_names_out(categorical_cols)
         one_hot_df = pd.DataFrame(one_hot_encoded, columns=one_hot_columns)
-        
-        # 3. Numeric + Categorical összefűzés
+
         final_df = pd.concat([input_data[numeric_cols].reset_index(drop=True), one_hot_df], axis=1)
-        
-        # 4. Addons feldolgozása és hiányzó oszlopok feltöltése
+
         input_addons = car.addons.split() if car.addons else []
         for col in feature_columns:
             if col not in final_df.columns:
-                # Ha az oszlop egy addon, ellenőrizzük, hogy benne van-e a kérésben
                 if col.startswith('addon_') and col.replace('addon_', '') in input_addons:
                     final_df[col] = 1.0
                 else:
                     final_df[col] = 0.0
-                
-        # Oszlopok pontos sorrendjének biztosítása a skálázóhoz
-        final_df = final_df[feature_columns] 
-        
-        # 5. Scaling
+
+        final_df = final_df[feature_columns]
+
         scaled_features = scaler.transform(final_df)
         input_tensor = torch.tensor(scaled_features, dtype=torch.float32).to(device)
-        
-        # 6. Predikció
+
         with torch.no_grad():
             scaled_prediction = ml_model(input_tensor).item()
-            
-        # 7. Visszaskálázás (Inverse Transform)
+
         group_name = car.model if car.model in group_stats else car.marca
-        
+
         if group_name in group_stats:
             mean_price = group_stats[group_name]['mean_price']
             std_price = group_stats[group_name]['std_price']
             if pd.isna(std_price):
                 std_price = 1.0
         else:
-            mean_price = 10000.0 
+            mean_price = 10000.0
             std_price = 5000.0
-            
+
         final_price = (scaled_prediction * std_price) + mean_price
-        
+
+        PREDICTION_REQUESTS.labels("POST", endpoint, "200").inc()
         return {"predictedPrice": round(final_price, 2)}
-        
+
     except Exception as e:
+        PREDICTION_REQUESTS.labels("POST", endpoint, "400").inc()
         raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        PREDICTION_LATENCY.labels(endpoint).observe(time.perf_counter() - start_time)

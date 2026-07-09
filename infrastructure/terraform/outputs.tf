@@ -18,25 +18,25 @@ output "master_private_ip" {
   value       = digitalocean_droplet.master.ipv4_address_private
 }
 
-# output "api_fqdn" {
-#   description = "Public API hostname used by the ingress resources."
-#   value       = local.api_fqdn
-# }
+output "api_fqdn" {
+  description = "Public API hostname used by the ingress resources."
+  value       = local.api_fqdn
+}
 
-# output "grafana_fqdn" {
-#   description = "Public Grafana hostname used by the ingress resources."
-#   value       = local.grafana_fqdn
-# }
+output "grafana_fqdn" {
+  description = "Public Grafana hostname used by the ingress resources."
+  value       = local.grafana_fqdn
+}
 
-# output "prometheus_fqdn" {
-#   description = "Public Prometheus hostname used by the ingress resources."
-#   value       = local.prometheus_fqdn
-# }
+output "prometheus_fqdn" {
+  description = "Public Prometheus hostname used by the ingress resources."
+  value       = local.prometheus_fqdn
+}
 
-# output "dns_zone" {
-#   description = "Primary DigitalOcean DNS zone managed by Terraform."
-#   value       = digitalocean_domain.primary.name
-# }
+output "dns_zone" {
+  description = "Primary DigitalOcean DNS zone managed by Terraform."
+  value       = digitalocean_domain.primary.name
+}
 
 output "app_namespace" {
   description = "Namespace for the application services."

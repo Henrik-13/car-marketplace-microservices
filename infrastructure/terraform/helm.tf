@@ -1,4 +1,4 @@
-# Create the namespaces that will host the application, observability, and certificate-management resources.
+# Create the namespaces that will host the application, monitoring, and certificate-management resources.
 resource "kubernetes_namespace_v1" "app" {
   metadata {
     name = var.app_namespace

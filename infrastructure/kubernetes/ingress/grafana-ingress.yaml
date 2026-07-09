@@ -2,18 +2,17 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: grafana-ingress
-  namespace: observability
+  namespace: monitoring
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: https-redirect@kubernetescrd
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - grafana.example.com
-      secretName: grafana-example-com-tls
+        - grafana.146.190.205.209.nip.io
+      secretName: grafana-146-190-205-209-nip-io-tls
   rules:
-    - host: grafana.example.com
+    - host: grafana.146.190.205.209.nip.io
       http:
         paths:
           - path: /
